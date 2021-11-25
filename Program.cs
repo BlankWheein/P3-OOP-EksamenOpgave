@@ -14,7 +14,6 @@ namespace EksamenOpgave
             Console.WriteLine(user);
             stregSystem.AddCreditsToAccount(user, 1000);
             Console.WriteLine(user);
-
             Product p = stregSystem.GetProductById(1);
             Console.WriteLine(p);
             stregSystem.BuyProduct(user, p);
