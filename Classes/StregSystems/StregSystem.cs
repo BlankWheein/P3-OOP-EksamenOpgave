@@ -2,25 +2,74 @@
 using System.Linq;
 using System.Collections.Generic;
 using EksamenOpgave.Exceptions;
-
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace EksamenOpgave
 {
     public class StregSystem 
     {
         public List<ITransaction> Transactions { get; set; } = new();
-        public List<User> Users { get; set; } = new() { 
-            new(1, "Mads", "Morten", "mm", "mm@mm.dk", 0) 
-        };
-        public List<Product> Products { get; set; } = new() { 
-            new Product(1, "Kage", 10, true, true),
-            new Product(2, "Mælk", 420, true, false),
-            new Product(3, "Agurk", 666, false, true),
-            new Product(4, "Pizza", 1337, false, false)
-        };
+        public List<User> Users { get; set; } = new();
+        public List<Product> Products { get; set; } = new();
+
+        private void ReadProducts()
+        {
+            int index = 0;
+            foreach (string line in File.ReadLines(@"../../../Data/products.csv"))
+            {
+                if (index == 0)
+                {
+                    index++;
+                    continue;
+                }
+                List<string> Lines = line.Split(";").ToList();
+                int Id = int.Parse(Lines[0]);
+                string Name = StripHTML(Lines[1]);
+                decimal Price = decimal.Parse(Lines[2]);
+                bool Active = Lines[3] == "0" ? false : true;
+                if (Lines[4] != "")
+                {
+                    Lines[4] = Lines[4].Replace("\"", "");
+                    DateTime Date = DateTime.Parse(Lines[4]);
+                    Products.Add(new SeasonalProduct(Id, Name, Price, Active, false, Date));
+                }
+                else
+                {
+                    Products.Add(new Product(Id, Name, Price, Active, false));
+                }
+                index++;
+            }
+        }
+        public static string StripHTML(string input)
+        {
+            return Regex.Replace(input, "<.*?>", String.Empty);
+        }
+        private void ReadUsers()
+        {
+            int index = 0;
+            foreach (string line in File.ReadLines(@"../../../Data/users.csv"))
+            {
+                if (index == 0)
+                {
+                    index++;
+                    continue;
+                }
+                List<string> Lines = line.Split(",").ToList();
+                int Id = int.Parse(Lines[0]);
+                string FirstName = Lines[1];
+                string LastName = Lines[2];
+                string UserName = Lines[3];
+                decimal Balance = decimal.Parse(Lines[4]);
+                string Email = Lines[5];
+                Users.Add(new User(Id, FirstName, LastName, UserName, Email, Balance));
+                index++;
+            }
+        }
         public StregSystem()
         {
-
+            ReadProducts();
+            ReadUsers();
         }
         public IEnumerable<Product> ActiveProducts()
         {
