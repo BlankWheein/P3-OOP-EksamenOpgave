@@ -11,9 +11,9 @@ namespace EksamenOpgave
         public Product Product { get; set; }
         public override string ToString()
         {
-            return $"Køb: {Product}, {base.ToString()}";
+            return $"Køb: {Product.Name}\n Balance: {User.Balance}";
         }
-        public void Execute() {
+        public override void Execute() {
             if (Product.IsActive == false) throw new ProductNotActiveException();
             if (Product.CanBeBoughtOnCredit == true)
             {

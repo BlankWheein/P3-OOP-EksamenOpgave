@@ -1,6 +1,8 @@
 ﻿using EksamenOpgave;
 using EksamenOpgave.Exceptions;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace EksamenOpgave.CLI
 {
@@ -15,12 +17,18 @@ namespace EksamenOpgave.CLI
         {
             Show();
         }
-        private void Show()
+        public void Reset()
+        {
+            Console.Clear();
+        }
+        public void Show()
         {
             foreach(Product product in StregSystem.ActiveProducts())
             {
                 Console.WriteLine(product);
             }
+            Console.WriteLine();
+            Console.Write("Input command: ");
         }
 
         public void DisplayUserNotFound(string username)
@@ -55,17 +63,21 @@ namespace EksamenOpgave.CLI
 
         public void DisplayUserBuysProduct(int count, BuyTransaction transaction)
         {
-            Console.WriteLine(transaction);
+            Console.WriteLine($"{count}x {transaction}");
         }
 
         public void Close()
         {
-            throw new System.NotImplementedException();
+
         }
 
         public void DisplayInsufficientCash(User user, Product product)
         {
             Console.WriteLine(new InsufficientCreditsException($"{user}, {product}"));
+        }
+        public void DisplayInsufficientCash(User user, List<(Product, int)> product)
+        {
+            Console.WriteLine(new InsufficientCreditsException($"{user.UserName}'s current balance: {user.Balance}kr\nNeeds {product.Sum(p => p.Item1.Price * p.Item2) - user.Balance}kr to buy products"));
         }
 
         public void DisplayGeneralError(string errorString)

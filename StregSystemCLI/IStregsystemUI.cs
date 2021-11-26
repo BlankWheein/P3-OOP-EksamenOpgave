@@ -1,4 +1,6 @@
 ﻿using EksamenOpgave;
+using System.Collections.Generic;
+
 namespace EksamenOpgave.CLI
 {
     public interface IStregsystemUI
@@ -12,7 +14,10 @@ namespace EksamenOpgave.CLI
         void DisplayUserBuysProduct(int count, BuyTransaction transaction);
         void Close();
         void DisplayInsufficientCash(User user, Product product);
+        void DisplayInsufficientCash(User user, List<(Product, int)> product);
         void DisplayGeneralError(string errorString);
         void Start();
+        void Reset();
+        void Show();
     }
 }

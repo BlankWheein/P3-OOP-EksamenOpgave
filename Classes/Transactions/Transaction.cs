@@ -31,6 +31,6 @@ namespace EksamenOpgave
         {
             return $"{Id}, {User}, {Amount}, {Date}";
         }
-        public void Execute() { }
+        public virtual void Execute() { }
     }
 }
