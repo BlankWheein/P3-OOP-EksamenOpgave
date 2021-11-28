@@ -48,7 +48,11 @@ namespace EksamenOpgave.Controller
         {
             
             CLI.Reset();
-
+            if (products.Any(p => p.Item2 < 1))
+            {
+                CLI.DisplayGeneralError("Count cant be less than 1");
+                return;
+            }
             decimal TotalPrice = products.Where(p => p.Item1.CanBeBoughtOnCredit == false).Sum(p => p.Item1.Price * p.Item2);
             if (TotalPrice > user.Balance)
             {
@@ -58,7 +62,11 @@ namespace EksamenOpgave.Controller
             }
             Delay = products.Count * 2500;
             foreach (var product in products)
-            {
+            {   if (product.Item2 < 1)
+                {
+                    CLI.DisplayGeneralError("Count cant be less than 1");
+                    return;
+                }
                 ITransaction t = null;
                 for (int i = 0; i < product.Item2; i++)
                 {
@@ -114,6 +122,13 @@ namespace EksamenOpgave.Controller
             if (user == null) return;
             args.RemoveAt(0);
             List<(Product, int)> products = new();
+            if (args.Count == 0)
+            {
+                Delay = 5000;
+                CLI.Reset();
+                CLI.DisplayUserInfo(user);
+                return;
+            }
             foreach (string s in args)
             {
                 int count = 1;
@@ -135,6 +150,7 @@ namespace EksamenOpgave.Controller
         #region AdminCommands
         private void QuitAction()
         {
+            Delay = 0;
             CLI.Close();
             _running = false;
         }

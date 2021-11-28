@@ -6,9 +6,15 @@ using EksamenOpgave.Exceptions;
 
 namespace EksamenOpgave
 {
-        public class User : IComparable<User>
+    public class User : IComparable<User>
         {
-        public delegate void UserBalanceNotification(User user, decimal balance);
+        //public delegate void UserBalanceLow(object source, UserBalanceEventArgs e);
+        public event EventHandler<UserBalanceEventArgs> BalanceLow;
+
+        protected virtual void OnBalanceLow()
+        {
+            BalanceLow?.Invoke(this, new UserBalanceEventArgs() { User = this, Balance = Balance });
+        }
 
         #region Private Properties
         private string _lastname;
@@ -63,7 +69,14 @@ namespace EksamenOpgave
         public decimal Balance
         {
             get => _balance;
-            set => _balance = value;
+            set
+            {
+                _balance = value;
+                if (_balance < 50)
+                {
+                    OnBalanceLow();
+                }
+            }
         }
         #endregion
         #region Public Overrides

@@ -121,10 +121,17 @@ namespace EksamenOpgave
         public IEnumerable<ITransaction> GetTransactions(User user, int count)
         {
             List<ITransaction> UserTransactions = Transactions.OrderByDescending(p => p.Date).ToList().FindAll(p => p.User.Id == user.Id);
-            if (UserTransactions.Count > count)
-            UserTransactions.RemoveRange(count, UserTransactions.Count - 1);
+            int index = 0;
             foreach (ITransaction t in UserTransactions)
+            {
+                index++;
                 yield return t;
+                if (index == 10)
+                {
+                    yield break;
+                }
+            }
+                
         }
         public Product GetProductById(int id)
         {

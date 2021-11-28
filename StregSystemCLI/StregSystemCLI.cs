@@ -3,6 +3,7 @@ using EksamenOpgave.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace EksamenOpgave.CLI
 {
@@ -15,6 +16,10 @@ namespace EksamenOpgave.CLI
         }
         public void Start()
         {
+            foreach (User u in StregSystem.Users)
+            {
+                u.BalanceLow += OnUserBalanceLow;
+            }
             Show();
         }
         public void Reset()
@@ -31,6 +36,12 @@ namespace EksamenOpgave.CLI
             Console.Write("Input command: ");
         }
 
+        public void OnUserBalanceLow(object source, UserBalanceEventArgs e)
+        {
+            Reset();
+            Console.WriteLine($"{e.User.UserName}'s balance is low :(");
+        }
+
         public void DisplayUserNotFound(string username)
         {
             Console.WriteLine($"User [{username}] was not found");
@@ -44,6 +55,12 @@ namespace EksamenOpgave.CLI
         public void DisplayUserInfo(User user)
         {
             Console.WriteLine(user);
+            if (user.Balance < 50)
+                Console.WriteLine("User balance is low");
+            foreach (ITransaction t in StregSystem.GetTransactions(user, 10))
+            {
+                Console.WriteLine(t);
+            }
         }
 
         public void DisplayTooManyArgumentsError(string command)
