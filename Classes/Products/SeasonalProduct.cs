@@ -10,7 +10,7 @@ namespace EksamenOpgave
         public DateTime SeasonEndDate { get; set; }
         public SeasonalProduct(int id, string name, decimal price, bool isActive, bool canBeBoughtOnCredit, DateTime Date) :base(id, name, price, isActive, canBeBoughtOnCredit)
         { 
-            this.SeasonEndDate = Date;
+            SeasonEndDate = Date;
         }
 
     }

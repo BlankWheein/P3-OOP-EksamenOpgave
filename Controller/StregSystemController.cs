@@ -27,7 +27,13 @@ namespace EksamenOpgave.Controller
             AdminCommands.Add(":deactivate", DeActivateAction);
             AdminCommands.Add(":quit", QuitAction);
             AdminCommands.Add(":q", QuitAction);
+            AdminCommands.Add(":crediton", CreditOnAction);
+            AdminCommands.Add(":creditoff", CreditOffAction);
+            AdminCommands.Add(":addcredits", AddCreditsAction);
         }
+
+        
+
         public void Start()
         {
             _running = true;
@@ -71,8 +77,8 @@ namespace EksamenOpgave.Controller
                 for (int i = 0; i < product.Item2; i++)
                 {
                     StregSystem.BuyProduct(user, product.Item1);
-                    t = StregSystem.GetTransactions(user, 1).ToList()[0];
                 }
+                t = StregSystem.GetTransactions(user, 1).ToList()[0];
                 if (t != null)
                 CLI.DisplayUserBuysProduct(product.Item2, (BuyTransaction)t);
             }
@@ -105,6 +111,7 @@ namespace EksamenOpgave.Controller
         private void ParseCommand(string command)
         {
             Delay = 2500;
+            command = command.Trim();
             Command = command;
             if (command.StartsWith(":"))
             {
@@ -152,6 +159,7 @@ namespace EksamenOpgave.Controller
         {
             Delay = 0;
             CLI.Close();
+            StregSystem.Close();
             _running = false;
         }
         public void ActivateAction()
@@ -168,6 +176,28 @@ namespace EksamenOpgave.Controller
         {
             product.IsActive = Active;
             Delay = 0;
+        }
+        private void SetProductCredit(Product product, bool Credit)
+        {
+            product.CanBeBoughtOnCredit = Credit;
+            Delay = 0;
+        }
+        private void CreditOffAction()
+        {
+            Product product = StregSystem.GetProductById(int.Parse(Command.Split(" ").ToList()[1]));
+            SetProductCredit(product, false);
+        }
+
+        private void CreditOnAction()
+        {
+            Product product = StregSystem.GetProductById(int.Parse(Command.Split(" ").ToList()[1]));
+            SetProductCredit(product, true);
+        }
+        private void AddCreditsAction()
+        {
+            User user = StregSystem.GetUserByUsername(Command.Split(" ").ToList()[1]);
+            decimal Balance = decimal.Parse(Command.Split(" ").ToList()[2]);
+            StregSystem.AddCreditsToAccount(user, Balance);
         }
         #endregion
     }

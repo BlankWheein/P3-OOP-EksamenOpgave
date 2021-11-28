@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using EksamenOpgave.Exceptions;
 using System.IO;
 using System.Text.RegularExpressions;
+using EksamenOpgave.Classes;
+using Microsoft.Extensions.Logging;
 
 namespace EksamenOpgave
 {
@@ -26,8 +28,9 @@ namespace EksamenOpgave
                 List<string> Lines = line.Split(";").ToList();
                 int Id = int.Parse(Lines[0]);
                 string Name = StripHTML(Lines[1]);
-                decimal Price = decimal.Parse(Lines[2]);
-                bool Active = Lines[3] == "0" ? false : true;
+                Name = Name.Replace("\"", String.Empty);
+                decimal Price = decimal.Parse(Lines[2]) / 100;
+                bool Active = Lines[3] != "0";
                 if (Lines[4] != "")
                 {
                     Lines[4] = Lines[4].Replace("\"", "");
@@ -46,6 +49,9 @@ namespace EksamenOpgave
         {
             return Regex.Replace(input, "<.*?>", String.Empty);
         }
+        public void Close()
+        {
+        }
         private void ReadUsers()
         {
             int index = 0;
@@ -61,7 +67,7 @@ namespace EksamenOpgave
                 string FirstName = Lines[1];
                 string LastName = Lines[2];
                 string UserName = Lines[3];
-                decimal Balance = decimal.Parse(Lines[4]);
+                decimal Balance = decimal.Parse(Lines[4])/100;
                 string Email = Lines[5];
                 Users.Add(new User(Id, FirstName, LastName, UserName, Email, Balance));
                 index++;
@@ -71,6 +77,11 @@ namespace EksamenOpgave
         {
             ReadProducts();
             ReadUsers();
+        }
+        private void Log(string t) { 
+            var Logger = File.AppendText("../../../Logs/StregSystem.log");
+            Logger.WriteLine(t);
+            Logger.Close();
         }
         public IEnumerable<Product> ActiveProducts()
         {
@@ -89,6 +100,7 @@ namespace EksamenOpgave
             {
                 throw;
             }
+            Log($"{user} // {t}");
         }
 
         public void BuyProduct(User user, Product product)
@@ -103,6 +115,8 @@ namespace EksamenOpgave
             {
                 throw;
             }
+            Log($"{user} // {t}");
+
         }
 
         public void ExecuteTransaction(ITransaction t)
