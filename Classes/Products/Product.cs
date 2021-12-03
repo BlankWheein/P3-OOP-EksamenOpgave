@@ -51,7 +51,11 @@ namespace EksamenOpgave
         #endregion
         public override string ToString()
         {
-            return $"{Id}, {Name}, {Price}";
+            string PriceString = String.Format("{0:.0}", Price);
+            string IdString = $"{Id}".PadRight(15, ' ');
+            string NameString = $"{Name}".PadRight(60, ' ');
+            PriceString = $"{PriceString}".PadRight(8, ' ');
+            return $"{IdString} {NameString} {PriceString}";
         }
     }
 }
