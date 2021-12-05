@@ -5,12 +5,18 @@ namespace EksamenOpgave
 {
     public interface IStregSystem
     {
-        BuyTransaction BuyProduct(User user, Product product);
-        InsertCashTransaction AddCreditsToAccount(User user, decimal amount);
+        List<Product> Products { get; set; }
+        List<ITransaction> Transactions { get; set; }
+        List<User> Users { get; set; }
+
+        IEnumerable<Product> ActiveProducts();
+        void AddCreditsToAccount(User user, decimal amount);
+        void BuyProduct(User user, Product product);
+        void Close();
+        void ExecuteTransaction(ITransaction t);
         Product GetProductById(int id);
+        IEnumerable<ITransaction> GetTransactions(User user, int count);
         User GetUser(Func<User, bool> predicate);
         User GetUserByUsername(string username);
-        IEnumerable<Transaction> GetTransactions(User user, int count);
-        IEnumerable<Product> ActiveProducts();
     }
 }
