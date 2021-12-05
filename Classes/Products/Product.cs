@@ -7,7 +7,7 @@ namespace EksamenOpgave
     public class Product
     {
 
-        #region Private Properties
+        #region Private fields
         private int _id;
         private string _name;
         private decimal _price;
