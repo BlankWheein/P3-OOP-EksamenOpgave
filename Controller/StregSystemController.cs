@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Input;
 using System.Text;
 using System.Threading.Tasks;
 using EksamenOpgave.CLI;
 using EksamenOpgave;
 using EksamenOpgave.Exceptions;
 using System.Threading;
+using System.Timers;
 
 namespace EksamenOpgave.Controller
 {
@@ -15,6 +17,7 @@ namespace EksamenOpgave.Controller
         private string Command;
         public Dictionary<string, Action> AdminCommands = new();
 
+        private readonly DelayHandler DelayHandler;
         StregSystem StregSystem { get; set; }
         IStregsystemUI CLI { get; set; }
         private int Delay;
@@ -23,6 +26,8 @@ namespace EksamenOpgave.Controller
         {
             this.CLI = CLI;
             StregSystem = stregSystem;
+            DelayHandler = new();
+            DelayHandler.OnTimerElapsed += OnTimerElapsed;
             AdminCommands.Add(":activate", ActivateAction);
             AdminCommands.Add(":deactivate", DeActivateAction);
             AdminCommands.Add(":quit", QuitAction);
@@ -32,19 +37,25 @@ namespace EksamenOpgave.Controller
             AdminCommands.Add(":addcredits", AddCreditsAction);
         }
 
-
-
+        private void OnTimerElapsed(object? sender, ElapsedEventArgs? e)
+        {
+            if (_running == true)
+                Reset();
+        }
+        private void Reset()
+        {
+            CLI.Reset();
+            CLI.Show();
+            WaitForInput();
+            DelayHandler.InvokeDelay(Delay);
+            if (DelayHandler.Wait == false)
+                OnTimerElapsed(null, null);
+        }
         public void Start()
         {
             _running = true;
             CLI.Start();
-            while (_running)
-            {
-                CLI.Reset();
-                CLI.Show();
-                WaitForInput();
-                Thread.Sleep(Delay);
-            }
+            Reset();
         }
         private void WaitForInput()
         {
