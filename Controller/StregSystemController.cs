@@ -115,9 +115,11 @@ namespace EksamenOpgave.Controller
             Command = command;
             if (command.StartsWith(":"))
             {
-                Action a = AdminCommands.Where(p => p.Key == command.Split(" ").ToList()[0].ToLower()).First().Value;
+                Action a = AdminCommands.Where(p => p.Key == command.Split(" ").ToList()[0].ToLower()).FirstOrDefault().Value ?? null;
                 if (a != null)
                     a();
+                else
+                    CLI.DisplayAdminCommandNotFoundMessage(command.Split(" ").ToList()[0]);
             }
             else
                 BuyParse();
