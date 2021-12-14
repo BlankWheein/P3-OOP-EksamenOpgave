@@ -13,9 +13,10 @@ namespace EksamenOpgave.Controller
     public class StregSystemController
     {
         private string Command;
-        public Dictionary<string, Action> AdminCommands = new();
+        public Dictionary<List<string>, Action> AdminCommands = new ();
         
         StregSystem StregSystem { get; set; }
+        private readonly string _adminPrefix = ":";
         IStregsystemUI CLI { get; set; }
         private int Delay;
         private bool _running;
@@ -23,13 +24,13 @@ namespace EksamenOpgave.Controller
         {
             this.CLI = CLI;
             StregSystem = stregSystem;
-            AdminCommands.Add(":activate", ActivateAction);
-            AdminCommands.Add(":deactivate", DeActivateAction);
-            AdminCommands.Add(":quit", QuitAction);
-            AdminCommands.Add(":q", QuitAction);
-            AdminCommands.Add(":crediton", CreditOnAction);
-            AdminCommands.Add(":creditoff", CreditOffAction);
-            AdminCommands.Add(":addcredits", AddCreditsAction);
+            AdminCommands.Add(new() { "activate"}, ActivateAction);
+            AdminCommands.Add(new() { "deactivate"}, DeActivateAction);
+            AdminCommands.Add(new() { "q", "quit" }, QuitAction);
+            AdminCommands.Add(new() { "crediton" }, CreditOnAction);
+            AdminCommands.Add(new() { "creditoff" }, CreditOffAction);
+            AdminCommands.Add(new() { "addcredits" }, AddCreditsAction);
+
         }
 
         
@@ -76,9 +77,14 @@ namespace EksamenOpgave.Controller
                 ITransaction t = null;
                 for (int i = 0; i < product.Item2; i++)
                 {
-                    StregSystem.BuyProduct(user, product.Item1);
+                    if (product.Item1.IsActive == true)
+                        StregSystem.BuyProduct(user, product.Item1);
+                    else
+                        CLI.DisplayProductNotActive(product.Item1);
                 }
-                t = StregSystem.GetTransactions(user, 1).ToList()[0];
+                List<ITransaction> transactions_ = StregSystem.GetTransactions(user, 1).ToList();
+                if (transactions_.Count > 0)
+                    t = transactions_.First();
                 if (t != null)
                 CLI.DisplayUserBuysProduct(product.Item2, (BuyTransaction)t);
             }
@@ -111,13 +117,21 @@ namespace EksamenOpgave.Controller
         private void ParseCommand(string command)
         {
             Delay = 2500;
-            command = command.Trim();
+            var KeyWords = command.Split(' ').Where(s => !string.IsNullOrWhiteSpace(s));
+            command = string.Join(" ", KeyWords);
             Command = command;
-            if (command.StartsWith(":"))
+            if (command.StartsWith(_adminPrefix))
             {
-                Action a = AdminCommands.Where(p => p.Key == command.Split(" ").ToList()[0].ToLower()).First().Value;
-                if (a != null)
-                    a();
+                var commandName = command.Split(" ").ToList()[0].ToLower().Split(_adminPrefix).Last();
+                try
+                {
+                AdminCommands.Where(p => p.Key.Any(o => o == commandName)).FirstOrDefault().Value?.Invoke();
+                }
+                catch (Exception ex)
+                {
+                    CLI.DisplayGeneralError(ex.ToString());
+                    Delay = 10000;
+                }
             }
             else
                 BuyParse();

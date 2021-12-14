@@ -12,7 +12,7 @@ namespace EksamenOpgave
         public Product Product { get; set; }
         public override string ToString()
         {
-            return $"Køb: {Product.Name} - Price: {Amount}";
+            return $"Køb: {Product.Name}";
         }
         public override void Execute() {
             if (Product.IsActive == false) throw new ProductNotActiveException();

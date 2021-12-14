@@ -51,13 +51,17 @@ namespace EksamenOpgave.CLI
         {
             Console.WriteLine($"Product [{product}] was not found");
         }
+        public void DisplayProductNotActive(Product product)
+        {
+            Console.WriteLine($"The product {product.Id} is not active");
+        }
 
         public void DisplayUserInfo(User user)
         {
             Console.WriteLine(user);
             if (user.Balance < 50)
                 Console.WriteLine("User balance is low");
-            foreach (ITransaction t in StregSystem.GetTransactions(user, 10))
+            foreach (ITransaction t in StregSystem.GetBuyTransactions(user, 10))
             {
                 Console.WriteLine(t);
             }
@@ -80,7 +84,7 @@ namespace EksamenOpgave.CLI
 
         public void DisplayUserBuysProduct(int count, BuyTransaction transaction)
         {
-            Console.WriteLine($"{count}x {transaction}");
+            Console.WriteLine($"{count}x {transaction}.. Total price: {transaction.Product.Price*count}");
         }
 
         public void Close()

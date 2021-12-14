@@ -106,15 +106,9 @@ namespace EksamenOpgave
         public void BuyProduct(User user, Product product)
         {
             BuyTransaction t;
-            try
-            {
                 t = new(Transactions.Count + 1, user, DateTime.Now, product);
                 ExecuteTransaction(t);
-            }
-            catch
-            {
-                throw;
-            }
+            
             Log($"{user} // {t}");
 
         }
@@ -132,21 +126,8 @@ namespace EksamenOpgave
             }
         }
 
-        public IEnumerable<ITransaction> GetTransactions(User user, int count)
-        {
-            List<ITransaction> UserTransactions = Transactions.OrderByDescending(p => p.Date).ToList().FindAll(p => p.User.Id == user.Id);
-            int index = 0;
-            foreach (ITransaction t in UserTransactions)
-            {
-                index++;
-                yield return t;
-                if (index == 10)
-                {
-                    yield break;
-                }
-            }
-                
-        }
+        public IEnumerable<ITransaction> GetTransactions(User user, int count) => Transactions.FindAll(p => p.User.Id == user.Id).OrderByDescending(p => p.Date).Take(count);
+        public IEnumerable<ITransaction> GetBuyTransactions(User user, int count) => Transactions.FindAll(p => p.User.Id == user.Id && p.GetType() == typeof(BuyTransaction)).OrderByDescending(p => p.Date).Take(count);
         public Product GetProductById(int id)
         {
             Product p = Products.Find(p => p.Id == id);
