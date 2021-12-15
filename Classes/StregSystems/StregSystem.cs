@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EksamenOpgave
 {
-    public class StregSystem 
+    public class StregSystem : IStregSystem
     {
         public List<ITransaction> Transactions { get; set; } = new();
         public List<User> Users { get; set; } = new();
@@ -44,7 +44,7 @@ namespace EksamenOpgave
                 index++;
             }
         }
-        
+
         public static string StripHTML(string input)
         {
             return Regex.Replace(input, "<.*?>", String.Empty);
@@ -67,7 +67,7 @@ namespace EksamenOpgave
                 string FirstName = Lines[1];
                 string LastName = Lines[2];
                 string UserName = Lines[3];
-                decimal Balance = decimal.Parse(Lines[4])/100;
+                decimal Balance = decimal.Parse(Lines[4]) / 100;
                 string Email = Lines[5];
                 Users.Add(new User(Id, FirstName, LastName, UserName, Email, Balance));
                 index++;
@@ -78,7 +78,8 @@ namespace EksamenOpgave
             ReadProducts();
             ReadUsers();
         }
-        private void Log(string t) { 
+        private void Log(string t)
+        {
             var Logger = File.AppendText("../../../Logs/StregSystem.log");
             Logger.WriteLine(t);
             Logger.Close();
@@ -96,7 +97,8 @@ namespace EksamenOpgave
             {
                 t = new(Transactions.Count + 1, user, DateTime.Now, amount);
                 ExecuteTransaction(t);
-            } catch
+            }
+            catch
             {
                 throw;
             }

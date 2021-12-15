@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Input;
 using System.Text;
 using System.Threading.Tasks;
 using EksamenOpgave.CLI;
 using EksamenOpgave;
 using EksamenOpgave.Exceptions;
 using System.Threading;
+using System.Timers;
 
 namespace EksamenOpgave.Controller
 {
-    public class StregSystemController
+    public class StregSystemController : IStregSystemController
     {
         private string Command;
         public Dictionary<List<string>, Action> AdminCommands = new ();
@@ -33,27 +35,33 @@ namespace EksamenOpgave.Controller
 
         }
 
-        
-
+        private void OnTimerElapsed(object? sender, ElapsedEventArgs? e)
+        {
+            if (_running == true)
+                Reset();
+        }
+        private void Reset()
+        {
+            CLI.Reset();
+            CLI.Show();
+            WaitForInput();
+            DelayHandler.InvokeDelay(Delay);
+            if (DelayHandler.Wait == false)
+                OnTimerElapsed(null, null);
+        }
         public void Start()
         {
             _running = true;
             CLI.Start();
-            while (_running)
-            {
-                CLI.Reset();
-                CLI.Show();
-                WaitForInput();
-                Thread.Sleep(Delay);
-            }
+            Reset();
         }
-        public void WaitForInput()
+        private void WaitForInput()
         {
             ParseCommand(Console.ReadLine());
         }
         private void Buy(User user, List<(Product, int)> products)
         {
-            
+
             CLI.Reset();
             if (products.Any(p => p.Item2 < 1))
             {
@@ -69,7 +77,8 @@ namespace EksamenOpgave.Controller
             }
             Delay = products.Count * 2500;
             foreach (var product in products)
-            {   if (product.Item2 < 1)
+            {
+                if (product.Item2 < 1)
                 {
                     CLI.DisplayGeneralError("Count cant be less than 1");
                     return;
@@ -86,10 +95,10 @@ namespace EksamenOpgave.Controller
                 if (transactions_.Count > 0)
                     t = transactions_.First();
                 if (t != null)
-                CLI.DisplayUserBuysProduct(product.Item2, (BuyTransaction)t);
+                    CLI.DisplayUserBuysProduct(product.Item2, (BuyTransaction)t);
             }
         }
-        
+
         private User GetUserByUsername(string username)
         {
             try
@@ -158,7 +167,8 @@ namespace EksamenOpgave.Controller
                 {
                     product = GetProductById(int.Parse(s.Split(":").ToList()[0]));
                     count = int.Parse(s.Split(":").ToList()[1]);
-                } else
+                }
+                else
                 {
                     product = GetProductById(int.Parse(s));
                 }
@@ -166,7 +176,7 @@ namespace EksamenOpgave.Controller
                 products.Add((product, count));
             }
             Buy(user, products);
-            
+
         }
         #region AdminCommands
         private void QuitAction()
@@ -176,12 +186,12 @@ namespace EksamenOpgave.Controller
             StregSystem.Close();
             _running = false;
         }
-        public void ActivateAction()
+        private void ActivateAction()
         {
             Product product = StregSystem.GetProductById(int.Parse(Command.Split(" ").ToList()[1]));
             SetProductActive(product, true);
         }
-        public void DeActivateAction()
+        private void DeActivateAction()
         {
             Product product = StregSystem.GetProductById(int.Parse(Command.Split(" ").ToList()[1]));
             SetProductActive(product, false);
